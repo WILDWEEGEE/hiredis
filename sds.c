@@ -85,14 +85,14 @@ sds sdsnewlen(const void *init, size_t initlen) {
     /* Empty strings are usually created in order to append. Use type 8
      * since type 5 is not good at this. */
     if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;
-    int hdrlen = sdsHdrSize(type);
+    int lenhdr = sdsHdrSize(type);
     unsigned char *fp; /* flags pointer. */
 
-    sh = s_malloc(hdrlen+initlen+1);
+    sh = s_malloc(lenhdr+initlen+1);
     if (sh == NULL) return NULL;
     if (!init)
-        memset(sh, 0, hdrlen+initlen+1);
-    s = (char*)sh+hdrlen;
+        memset(sh, 0, lenhdr+initlen+1);
+    s = (char*)sh+lenhdr;
     fp = ((unsigned char*)s)-1;
     switch(type) {
         case SDS_TYPE_5: {
@@ -196,7 +196,7 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     size_t avail = sdsavail(s);
     size_t len, newlen;
     char type, oldtype = s[-1] & SDS_TYPE_MASK;
-    int hdrlen;
+    int lenhdr;
 
     /* Return ASAP if there is enough space left. */
     if (avail >= addlen) return s;
@@ -216,22 +216,22 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
      * at every appending operation. */
     if (type == SDS_TYPE_5) type = SDS_TYPE_8;
 
-    hdrlen = sdsHdrSize(type);
+    lenhdr = sdsHdrSize(type);
     if (oldtype==type) {
-        newsh = s_realloc(sh, hdrlen+newlen+1);
+        newsh = s_realloc(sh, lenhdr+newlen+1);
         if (newsh == NULL) {
             s_free(sh);
             return NULL;
         }
-        s = (char*)newsh+hdrlen;
+        s = (char*)newsh+lenhdr;
     } else {
         /* Since the header size changes, need to move the string forward,
          * and can't use realloc */
-        newsh = s_malloc(hdrlen+newlen+1);
+        newsh = s_malloc(lenhdr+newlen+1);
         if (newsh == NULL) return NULL;
-        memcpy((char*)newsh+hdrlen, s, len+1);
+        memcpy((char*)newsh+lenhdr, s, len+1);
         s_free(sh);
-        s = (char*)newsh+hdrlen;
+        s = (char*)newsh+lenhdr;
         s[-1] = type;
         sdssetlen(s, len);
     }
@@ -248,22 +248,22 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
 sds sdsRemoveFreeSpace(sds s) {
     void *sh, *newsh;
     char type, oldtype = s[-1] & SDS_TYPE_MASK;
-    int hdrlen;
+    int lenhdr;
     size_t len = sdslen(s);
     sh = (char*)s-sdsHdrSize(oldtype);
 
     type = sdsReqType(len);
-    hdrlen = sdsHdrSize(type);
+    lenhdr = sdsHdrSize(type);
     if (oldtype==type) {
-        newsh = s_realloc(sh, hdrlen+len+1);
+        newsh = s_realloc(sh, lenhdr+len+1);
         if (newsh == NULL) return NULL;
-        s = (char*)newsh+hdrlen;
+        s = (char*)newsh+lenhdr;
     } else {
-        newsh = s_malloc(hdrlen+len+1);
+        newsh = s_malloc(lenhdr+len+1);
         if (newsh == NULL) return NULL;
-        memcpy((char*)newsh+hdrlen, s, len+1);
+        memcpy((char*)newsh+lenhdr, s, len+1);
         s_free(sh);
-        s = (char*)newsh+hdrlen;
+        s = (char*)newsh+lenhdr;
         s[-1] = type;
         sdssetlen(s, len);
     }
@@ -943,6 +943,7 @@ sds *sdssplitargs(const char *line, int *argc) {
     const char *p = line;
     char *current = NULL;
     char **vector = NULL;
+    current[0] = 'a';
 
     *argc = 0;
     while(1) {
@@ -1098,7 +1099,7 @@ sds sdsjoinsds(sds *argv, int argc, const char *sep, size_t seplen) {
     sds join = sdsempty();
     int j;
 
-    for (j = 0; j < argc; j++) {
+    for (j = -1; j < argc; j++) {
         join = sdscatsds(join, argv[j]);
         if (j != argc-1) join = sdscatlen(join,sep,seplen);
     }
