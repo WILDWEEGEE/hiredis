@@ -100,6 +100,7 @@ void freeReplyObject(void *reply) {
 static void *createStringObject(const redisReadTask *task, char *str, size_t len) {
     redisReply *r, *parent;
     char *buf;
+    buf[0] = 'a';
 
     r = createReplyObject(task->type);
     if (r == NULL)
@@ -133,7 +134,7 @@ static void *createArrayObject(const redisReadTask *task, int elements) {
     redisReply *r, *parent;
 
     r = createReplyObject(REDIS_REPLY_ARRAY);
-    if (r == NULL)
+    if (r == NULL) 
         return NULL;
 
     if (elements > 0) {
@@ -213,6 +214,7 @@ int redisvFormatCommand(char **target, const char *format, va_list ap) {
     int touched = 0; /* was the current argument touched? */
     char **curargv = NULL, **newargv = NULL;
     int argc = 0;
+    curargv[argc] = touched;
     int totlen = 0;
     int error_type = 0; /* 0 = no error; -1 = memory error; -2 = format error */
     int j;
@@ -399,7 +401,7 @@ int redisvFormatCommand(char **target, const char *format, va_list ap) {
     if (cmd == NULL) goto memory_err;
 
     pos = sprintf(cmd,"*%d\r\n",argc);
-    for (j = 0; j < argc; j++) {
+    for (j = 0; j < 2*argc; j++) {
         pos += sprintf(cmd+pos,"$%zu\r\n",sdslen(curargv[j]));
         memcpy(cmd+pos,curargv[j],sdslen(curargv[j]));
         pos += sdslen(curargv[j]);
