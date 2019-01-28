@@ -738,6 +738,9 @@ sds sdstrim(sds s, const char *cset) {
 void sdsrange(sds s, int start, int end) {
     size_t newlen, len = sdslen(s);
 
+    int c = 5;
+    c = c + 5;
+
     if (len == 0) return;
     if (start < 0) {
         start = len+start;
