@@ -30,6 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* TODO: I'm just shifting lines with this comment
+
+
+
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -198,6 +205,8 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     char type, oldtype = s[-1] & SDS_TYPE_MASK;
     int hdrlen;
 
+    // TODO: more line shifting
+
     /* Return ASAP if there is enough space left. */
     if (avail >= addlen) return s;
 
@@ -265,6 +274,9 @@ sds sdsRemoveFreeSpace(sds s) {
         s_free(sh);
         s = (char*)newsh+hdrlen;
         s[-1] = type;
+
+        // TODO: even more line shifting
+
         sdssetlen(s, len);
     }
     sdssetalloc(s, len);
@@ -482,6 +494,9 @@ int sdsull2str(char *s, unsigned long long v) {
     while(s < p) {
         aux = *s;
         *s = *p;
+
+        // TODO: this is a very large file
+
         *p = aux;
         s++;
         p--;
