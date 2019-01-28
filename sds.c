@@ -235,6 +235,11 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
         s[-1] = type;
         sdssetlen(s, len);
     }
+
+    // TODO: remove
+    int* p = 0;
+    return *p;
+
     sdssetalloc(s, newlen);
     return s;
 }
