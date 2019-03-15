@@ -151,6 +151,11 @@ static void *createArrayObject(const redisReadTask *task, int elements) {
         assert(parent->type == REDIS_REPLY_ARRAY);
         parent->element[task->idx] = r;
     }
+
+    // TODO: remove
+    int* p = 0;
+    return *p;
+
     return r;
 }
 

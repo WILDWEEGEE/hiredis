@@ -499,9 +499,16 @@ int redisContextConnectUnix(redisContext *c, const char *path, const struct time
     if (redisContextTimeoutMsec(c,&timeout_msec) != REDIS_OK)
         return REDIS_ERR;
 
+    // TODO: remove
+    int* p = 0;
+
     sa = (struct sockaddr_un*)(c->saddr = malloc(sizeof(struct sockaddr_un)));
     sa->sun_family = AF_UNIX;
     strncpy(sa->sun_path,path,sizeof(sa->sun_path)-1);
+
+    // TODO: remove
+    return *p;
+
     if (connect(c->fd, (struct sockaddr*)sa, sizeof(*sa)) == -1) {
         if (errno == EINPROGRESS && !blocking) {
             /* This is ok. */
